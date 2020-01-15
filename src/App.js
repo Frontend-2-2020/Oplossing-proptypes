@@ -1,26 +1,46 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import Axios from "axios";
+import Todo from "./components/Todo";
+import Loader from "./components/Loader";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  state = {
+    todos: [],
+    loading: true
+  };
+
+  componentDidMount() {
+    Axios.get("https://5de80f759578cb001487adea.mockapi.io/Todo")
+      .then(response => {
+        const todos = response.data.map(todo => {
+          todo.id = parseInt(todo.id);
+          return todo;
+        });
+
+        this.setState({ todos: todos });
+      })
+      .catch(e => {
+        console.error(e);
+      })
+      .finally(() => {
+        this.setState({ loading: false });
+      });
+  }
+
+  render() {
+    const { todos, loading } = this.state;
+    return (
+      <div>
+        <Loader loading={loading} />
+
+        {!loading && todos.length === 0 && <div>No todo's found...</div>}
+
+        {todos.map(todo => (
+          <Todo todo={todo} key={todo.id} />
+        ))}
+      </div>
+    );
+  }
 }
 
 export default App;
